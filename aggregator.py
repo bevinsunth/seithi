@@ -1,6 +1,7 @@
 import feedparser
 import database
 import filters
+import crawler
 from jinja2 import Environment, FileSystemLoader
 import os
 from datetime import datetime
@@ -35,7 +36,17 @@ def fetch_and_process():
                 'source': source
             }
             
-            status, reason = filters.apply_filters(article_data)
+            # Fetch full article content
+            print(f"  Crawling: {article_data['title'][:60]}...")
+            full_content, crawl_status, crawler_method = crawler.fetch_article_content(article_data['link'])
+            article_data['full_content'] = full_content
+            article_data['crawl_status'] = crawl_status
+            article_data['crawler_method'] = crawler_method
+            article_data['crawled_at'] = datetime.now() if crawl_status == 'success' else None
+            
+            # Apply filters using full content if available, otherwise use summary
+            content_for_filtering = full_content if full_content else article_data['summary']
+            status, reason = filters.apply_filters(article_data, content_for_filtering)
             article_data['filter_status'] = status
             article_data['filter_reason'] = reason
             

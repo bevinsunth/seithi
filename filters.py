@@ -31,9 +31,9 @@ def length_heuristic(body_text):
     count = len(words)
     return count < 20, count
 
-def apply_filters(article):
+def apply_filters(article, content_to_filter=None):
     title = article.get('title', '')
-    summary = article.get('summary', '') or ''
+    summary = content_to_filter if content_to_filter else (article.get('summary', '') or '')
     
     if scream_check(title):
         return 'filtered', 'Scream Check (>30% CAPS)'
