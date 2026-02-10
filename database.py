@@ -41,6 +41,10 @@ def init_db():
             crawl_status TEXT DEFAULT 'pending',
             crawler_method TEXT DEFAULT 'none',
             crawled_at TIMESTAMP,
+            ml_classification TEXT,
+            ml_confidence FLOAT,
+            ml_ragebait_score FLOAT,
+            ml_nuanced_score FLOAT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -69,6 +73,26 @@ def init_db():
             EXCEPTION
                 WHEN duplicate_column THEN NULL;
             END;
+            BEGIN
+                ALTER TABLE articles ADD COLUMN ml_classification TEXT;
+            EXCEPTION
+                WHEN duplicate_column THEN NULL;
+            END;
+            BEGIN
+                ALTER TABLE articles ADD COLUMN ml_confidence FLOAT;
+            EXCEPTION
+                WHEN duplicate_column THEN NULL;
+            END;
+            BEGIN
+                ALTER TABLE articles ADD COLUMN ml_ragebait_score FLOAT;
+            EXCEPTION
+                WHEN duplicate_column THEN NULL;
+            END;
+            BEGIN
+                ALTER TABLE articles ADD COLUMN ml_nuanced_score FLOAT;
+            EXCEPTION
+                WHEN duplicate_column THEN NULL;
+            END;
         END $$;
     """)
     
@@ -81,8 +105,8 @@ def save_article(article_data):
     cur = conn.cursor()
     
     insert_query = """
-        INSERT INTO articles (title, link, summary, published_date, source, filter_status, filter_reason, word_count, full_content, crawl_status, crawler_method, crawled_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO articles (title, link, summary, published_date, source, filter_status, filter_reason, word_count, full_content, crawl_status, crawler_method, crawled_at, ml_classification, ml_confidence, ml_ragebait_score, ml_nuanced_score)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (link) DO UPDATE SET
             full_content = EXCLUDED.full_content,
             crawl_status = EXCLUDED.crawl_status,
@@ -90,7 +114,11 @@ def save_article(article_data):
             crawled_at = EXCLUDED.crawled_at,
             filter_status = EXCLUDED.filter_status,
             filter_reason = EXCLUDED.filter_reason,
-            word_count = EXCLUDED.word_count
+            word_count = EXCLUDED.word_count,
+            ml_classification = EXCLUDED.ml_classification,
+            ml_confidence = EXCLUDED.ml_confidence,
+            ml_ragebait_score = EXCLUDED.ml_ragebait_score,
+            ml_nuanced_score = EXCLUDED.ml_nuanced_score
     """
     
     cur.execute(insert_query, (
@@ -105,7 +133,11 @@ def save_article(article_data):
         article_data.get('full_content', ''),
         article_data.get('crawl_status', 'pending'),
         article_data.get('crawler_method', 'none'),
-        article_data.get('crawled_at')
+        article_data.get('crawled_at'),
+        article_data.get('ml_classification'),
+        article_data.get('ml_confidence'),
+        article_data.get('ml_ragebait_score'),
+        article_data.get('ml_nuanced_score')
     ))
     
     conn.commit()
@@ -116,7 +148,7 @@ def get_articles(status='clean'):
     conn = get_connection()
     cur = conn.cursor()
     
-    cur.execute("SELECT title, link, summary, source, filter_reason FROM articles WHERE filter_status = %s ORDER BY published_date DESC", (status,))
+    cur.execute("SELECT title, link, summary, source, filter_reason, ml_classification, ml_confidence, ml_ragebait_score, ml_nuanced_score FROM articles WHERE filter_status = %s ORDER BY published_date DESC", (status,))
     articles = cur.fetchall()
     
     cur.close()
@@ -128,6 +160,10 @@ def get_articles(status='clean'):
             'link': a[1],
             'summary': a[2],
             'source': a[3],
-            'filter_reason': a[4]
+            'filter_reason': a[4],
+            'ml_classification': a[5],
+            'ml_confidence': a[6],
+            'ml_ragebait_score': a[7],
+            'ml_nuanced_score': a[8]
         } for a in articles
     ]
