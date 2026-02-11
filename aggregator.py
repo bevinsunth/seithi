@@ -10,13 +10,11 @@ import time
 
 RSS_FEEDS = [
     "https://www.abc.net.au/news/feed/1948/rss.xml",
-    "https://www.smh.com.au/rss/feed.xml",
-    "https://www.theage.com.au/rss/feed.xml",
+    "https://www.theguardian.com/au/rss",
     "https://www.thehindu.com/feeder/default.rss",
     "https://feeds.feedburner.com/ndtvnews-top-stories",
     "https://indianexpress.com/feed/",
     "http://feeds.bbci.co.uk/news/world/rss.xml",
-    "https://www.theguardian.com/au/rss",
     "https://www.reutersagency.com/feed/"
 ]
 
