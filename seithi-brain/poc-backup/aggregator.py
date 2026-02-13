@@ -9,13 +9,14 @@ from datetime import datetime
 import time
 
 RSS_FEEDS = [
-    "https://www.abc.net.au/news/feed/1948/rss.xml",
-    "https://www.theguardian.com/au/rss",
-    "https://www.thehindu.com/feeder/default.rss",
-    "https://feeds.feedburner.com/ndtvnews-top-stories",
-    "https://indianexpress.com/feed/",
-    "http://feeds.bbci.co.uk/news/world/rss.xml",
-    "https://www.reutersagency.com/feed/"
+    "https://www.sbs.com.au/news/feed",
+    # "https://www.abc.net.au/news/feed/1948/rss.xml",
+    # "https://www.theguardian.com/au/rss",
+    # "https://www.thehindu.com/feeder/default.rss",
+    # "https://feeds.feedburner.com/ndtvnews-top-stories",
+    # "https://indianexpress.com/feed/",
+    # "http://feeds.bbci.co.uk/news/world/rss.xml",
+    # "https://www.reutersagency.com/feed/"
 ]
 
 def fetch_and_process():
@@ -63,6 +64,32 @@ def fetch_and_process():
             article_data['ml_confidence'] = confidence
             article_data['ml_ragebait_score'] = scores.get('ragebait', 0.0)
             article_data['ml_nuanced_score'] = scores.get('nuanced', 0.0)
+            
+            # Extract tags for hybrid classification
+            tags = []
+            if 'tags' in entry:
+                tags = [t.term for t in entry.tags]
+            
+            # Additional classifications (Hybrid: Tags > URL > ML)
+            topic, topic_conf, _ = classifier.classify_hybrid_topic(
+                article_data['title'], 
+                content_for_filtering,
+                url=article_data['link'],
+                tags=tags
+            )
+            region, region_conf, _ = classifier.classify_hybrid_region(
+                article_data['title'], 
+                content_for_filtering,
+                url=article_data['link'],
+                tags=tags
+            )
+            
+            article_data['ml_topic'] = topic
+            article_data['ml_region'] = region
+            
+            print(f"    -> Style: {classification} ({confidence:.2f})")
+            print(f"    -> Topic: {topic} ({topic_conf:.2f})")
+            print(f"    -> Region: {region} ({region_conf:.2f})")
             
             database.save_article(article_data)
 
