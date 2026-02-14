@@ -21,3 +21,9 @@ The infrastructure manages the following services:
 ## Getting Started
 
 (To be added)
+
+
+
+Manually create a superuser
+
+`docker exec -it seithi-postgres psql -U postgres -c "CREATE USER admin_user WITH SUPERUSER PASSWORD 'your_secure_password';"`
