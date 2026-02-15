@@ -35,32 +35,45 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     GRANT USAGE ON SCHEMA seithi TO $READONLY_USER;
 EOSQL
 
-# 3. Create Tables (in seithi schema)
+# 3. Create Tables (in seithi schema) - Official Seithi Specification
 echo "Creating tables..."
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
     SET search_path TO seithi, public;
 
+    -- Articles Table (Official Schema)
     CREATE TABLE IF NOT EXISTS articles (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         title TEXT NOT NULL,
-        link TEXT UNIQUE NOT NULL,
+        url TEXT UNIQUE NOT NULL,
+        domain TEXT NOT NULL,
+        content TEXT,
         summary TEXT,
-        published_date TIMESTAMP,
-        source TEXT,
-        filter_status TEXT DEFAULT 'clean',
-        filter_reason TEXT,
-        word_count INTEGER,
-        full_content TEXT,
-        crawl_status TEXT DEFAULT 'pending',
-        crawler_method TEXT DEFAULT 'none',
-        crawled_at TIMESTAMP,
-        ml_classification TEXT,
-        ml_confidence FLOAT,
-        ml_ragebait_score FLOAT,
-        ml_nuanced_score FLOAT,
-        ml_topic TEXT,
-        ml_region TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        published_at TIMESTAMP,
+        
+        -- Scoring Columns (0, 1, or 2)
+        score_factual INT DEFAULT 0,
+        score_emotive INT DEFAULT 0,
+        score_density INT DEFAULT 0,
+        
+        -- Metadata
+        is_user_corrected BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    -- Optimized for the "Seithi Sort" (High Depth + High Calm)
+    CREATE INDEX IF NOT EXISTS idx_seithi_sort ON articles (
+        score_density DESC, 
+        score_emotive DESC, 
+        published_at DESC
+    );
+
+    -- Feedback Log Table (Training Data)
+    CREATE TABLE IF NOT EXISTS feedback_log (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        article_id UUID REFERENCES articles(id),
+        axis VARCHAR(20) NOT NULL,  -- 'factual', 'emotive', 'density'
+        user_score INT NOT NULL,    -- 0, 1, or 2
+        timestamp TIMESTAMP DEFAULT NOW()
     );
 EOSQL
 

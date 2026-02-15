@@ -22,4 +22,46 @@ The initial proof-of-concept implementation is preserved in the `poc-backup/` di
 
 ## Getting Started
 
-(To be added)
+### Local Development Setup
+
+To run Seithi Brain locally in a virtual environment:
+
+1.  **Navigate to the directory**:
+    ```bash
+    cd seithi-brain
+    ```
+
+2.  **Create a virtual environment**:
+    ```bash
+    python3 -m venv .venv
+    ```
+
+3.  **Activate the virtual environment**:
+    ```bash
+    source .venv/bin/activate
+    ```
+
+4.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5.  **Environment Variables**:
+    Create a `.env` file or export the following variables:
+    ```bash
+    POSTGRES_DB=seithi
+    POSTGRES_USER=app_user
+    POSTGRES_PASSWORD=your_password
+    POSTGRES_HOST=localhost
+    POSTGRES_PORT=5433
+    ```
+
+6.  **Run the service**:
+    ```bash
+    python3 -m src.main
+    ```
+
+## Development
+
+- Follow PEP 8 and use type hints as specified in `AGENTS.md`.
+- Run tests using `pytest`.

@@ -23,24 +23,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # seithi-brain:
-  #   build: 
-  #     context: ../seithi-brain
-  #     dockerfile: Dockerfile
-  #   container_name: seithi-brain
-  #   restart: unless-stopped
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     POSTGRES_HOST: postgres
-  #     POSTGRES_USER: ${APP_USER}
-  #     POSTGRES_PASSWORD: ${APP_PASSWORD}
-  #   networks:
-  #     - seithi-network
-
 
 networks:
   seithi-network:

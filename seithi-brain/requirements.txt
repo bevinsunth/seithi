@@ -16,4 +16,4 @@ tqdm>=4.66.1
 requests>=2.31.0
 numpy>=1.24.0
 schedule>=1.2.0
-lxml[html_clean]
+lxml>=4.9.0,<5.2.0

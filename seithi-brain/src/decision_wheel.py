@@ -34,44 +34,43 @@ class DecisionWheel:
 
     def score_article(self, title, text):
         """
-        Returns a dictionary of scores (0, 1, 2) for each axis.
+        Returns probability distributions for each axis.
+        Each axis returns a list of 3 probabilities corresponding to [class_0, class_1, class_2].
         """
         input_text = self._truncate_text(title, text)
         results = {}
 
         # 1. Epistemic Axis (Truth)
-        # Labels: Speculation (0), Mixed (1), Verified Fact (2)
-        score = self._predict_axis(input_text, AXIS_EPISTEMIC)
-        results["score_factual"] = score
+        # Returns: [Opinion_prob, Mixed_prob, Facts_prob]
+        results["epistemic_scores"] = self._predict_axis(input_text, AXIS_EPISTEMIC)
 
         # 2. Emotive Axis (Tone)
-        # Labels: Triggering (0), Edgy (1), Calm (2)
-        score = self._predict_axis(input_text, AXIS_EMOTIVE)
-        results["score_emotive"] = score
+        # Returns: [Triggering_prob, Mixed_prob, Calm_prob]
+        results["emotive_scores"] = self._predict_axis(input_text, AXIS_EMOTIVE)
 
         # 3. Density Axis (Depth)
-        # Labels: Fluff (0), Standard (1), Deep Dive (2)
-        score = self._predict_axis(input_text, AXIS_DENSITY)
-        results["score_density"] = score
+        # Returns: [Fluff_prob, Standard_prob, Deep_prob]
+        results["density_scores"] = self._predict_axis(input_text, AXIS_DENSITY)
 
         return results
 
     def _predict_axis(self, text, axis_config):
         """
         Helper to run the classifier for a single axis.
+        Returns a list of 3 probabilities in the original label order.
         """
         labels = axis_config["labels"]
         template = axis_config.get("hypothesis_template", "This text is {}.")
         
         output = self.classifier(text, labels, hypothesis_template=template, multi_label=False)
         
-        # The output['labels'] are sorted by score, output['scores'] matches that order.
-        # We need to find the index of the highest scoring label in our ORIGINAL ordered list.
-        # Original: [Label0, Label1, Label2] -> Index is the score (0, 1, or 2)
+        # The classifier returns labels and scores sorted by confidence
+        # We need to map them back to the original label order
+        label_to_score = dict(zip(output['labels'], output['scores']))
         
-        top_label = output['labels'][0]
-        # Return the index (0, 1, or 2)
-        return labels.index(top_label)
+        # Return probabilities in original order: [label[0], label[1], label[2]]
+        return [label_to_score[label] for label in labels]
+
 
 if __name__ == "__main__":
     # Test Run
