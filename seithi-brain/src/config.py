@@ -26,20 +26,20 @@ FT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "../models/setfit_v1")
 
 AXIS_EPISTEMIC = {
     "name": "epistemic",
-    "labels": ["Opinion", "Opinion and Facts", "Facts"],
-    "hypothesis_template": "This article is based on {}."
+    "labels": ["Opinionated", "Balanced with Opinions and Facts", "Factual"],
+    "hypothesis_template": "This article is {}."
 }
 
 AXIS_EMOTIVE = {
     "name": "emotive",
-    "labels": ["Triggering", "Calm and Triggering", "Calm"],
-    "hypothesis_template": "The tone of this article is {}."
+    "labels": ["Triggering", "Neutral", "Calm"],
+    "hypothesis_template": "The emotion of this article is {}."
 }
 
 AXIS_DENSITY = {
     "name": "density",
     "labels": ["Fluff", "Standard", "Deep Dive"],
-    "hypothesis_template": "This article is best described as {}."
+    "hypothesis_template": "The content depth of this article is {}."
 }
 
 # Mapping for Zero-Shot
@@ -54,10 +54,10 @@ FILTER_ENABLED = False  # Set to True to enable filtering
 FILTER_THRESHOLDS = {
     # Epistemic axis: Require high confidence in "Facts" (index 2)
     "epistemic_facts_min": 0.5,      # At least 50% confidence in "Facts"
-    
+
     # Emotive axis: Require high confidence in "Calm" (index 2)
     "emotive_calm_min": 0.4,         # At least 40% confidence in "Calm"
-    
+
     # Density axis: Require high confidence in "Deep" (index 2)
     "density_deep_min": 0.3          # At least 30% confidence in "Deep Dive"
 }
