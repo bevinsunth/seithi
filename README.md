@@ -44,6 +44,9 @@ Seithi uses a hybrid development model:
 
 ## Deployment
 
+For instructions on how to deploy Seithi to production (Oracle Cloud, Raspberry Pi, etc.), see the [Deployment Guide](./deploy/README.md).
+
+
 ## Project Phases
 
 - **Phase 1**: Infrastructure & Orchestration ← Current Phase

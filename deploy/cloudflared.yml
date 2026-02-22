@@ -1,0 +1,10 @@
+tunnel: <UUID_FROM_CLOUDFLARE_DASHBOARD>
+credentials-file: /home/pi/.cloudflared/<UUID>.json
+
+ingress:
+  # Route traffic for "brain.yourdomain.com" to local ML service
+  - hostname: brain.yourdomain.com
+    service: http://localhost:8000
+  
+  # Catch-all rule (required)
+  - service: http_status:404

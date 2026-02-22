@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: seithi-postgres
+    restart: always
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - seithi-net
+
+networks:
+  seithi-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
