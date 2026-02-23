@@ -5,15 +5,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# --- Database Configuration ---
-DB_NAME = os.getenv("POSTGRES_DB", "seithi")
-DB_USER = os.getenv("POSTGRES_USER", "seithi_user")
-DB_PASS = os.getenv("POSTGRES_PASSWORD", "")
-DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-DB_PORT = os.getenv("POSTGRES_PORT", "5432")
-
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
 # --- ML Configuration ---
 # Zero-Shot Model for Cold Start
 ZERO_SHOT_MODEL = "valhalla/distilbart-mnli-12-3"

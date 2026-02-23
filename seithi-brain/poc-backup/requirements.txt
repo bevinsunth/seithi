@@ -1,8 +1,0 @@
-feedparser
-jinja2
-requests
-beautifulsoup4
-psycopg2-binary
-newspaper4k
-sentence-transformers
-torch

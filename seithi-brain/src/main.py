@@ -5,6 +5,7 @@ from .decision_wheel import DecisionWheel
 from .database import Database
 from .config import FILTER_ENABLED, FILTER_THRESHOLDS
 import os
+import uuid
 
 # Configuration
 RSS_FEEDS = [
@@ -72,6 +73,7 @@ def run_ingestion_cycle():
             # 4. Save to DB
             # Map probability arrays to individual database columns
             full_record = {
+                "id": str(uuid.uuid4()),
                 "title": article_data['title'],
                 "url": url,
                 "domain": article_data['domain'],
@@ -104,7 +106,8 @@ def run_ingestion_cycle():
                 print(f"   Density: {density_label} ({max(scores['density_scores']):.2f})")
                 total_new += 1
             else:
-                print(f"❌ Failed to save: {article_data['title']}")
+                # Error or ignored (duplicate) - specific logging is handled inside db.save_article
+                pass
 
     print(f"--- Cycle Complete. New Articles: {total_new} ---")
     db.close()

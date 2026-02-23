@@ -49,11 +49,8 @@ To run Seithi Brain locally in a virtual environment:
 5.  **Environment Variables**:
     Create a `.env` file or export the following variables:
     ```bash
-    POSTGRES_DB=seithi
-    POSTGRES_USER=app_user
-    POSTGRES_PASSWORD=your_password
-    POSTGRES_HOST=localhost
-    POSTGRES_PORT=5433
+    INGEST_URL=http://localhost:5173/api/ingest
+    INGEST_SECRET=your-secret-key
     ```
 
 6.  **Run the service**:

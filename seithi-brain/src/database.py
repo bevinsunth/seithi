@@ -2,7 +2,7 @@ import os
 import requests
 import datetime
 import json
-from .config import DATABASE_URL # We might repurpose this or use a new INGEST_URL
+# from .config import DATABASE_URL # We might repurpose this or use a new INGEST_URL
 
 INGEST_URL = os.getenv("INGEST_URL", "http://localhost:5173/api/ingest")
 INGEST_SECRET = os.getenv("INGEST_SECRET", "dev-secret-key-123")
@@ -36,7 +36,10 @@ class Database:
                 article_data['published_at'] = article_data['published_at'].isoformat()
                 
             response = self.session.post(INGEST_URL, json=article_data)
-            response.raise_for_status() # Raise exception for 4xx/5xx errors
+            
+            if not response.ok:
+                print(f"API Error ({response.status_code}): {response.text}")
+                response.raise_for_status()
             
             result = response.json()
             if result.get("status") == "ignored":
