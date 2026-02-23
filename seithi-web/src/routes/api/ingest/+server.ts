@@ -7,7 +7,6 @@ export async function POST({ request, platform }) {
 
     // 1. Authorization Check
     const authHeader = request.headers.get('Authorization');
-    // Ensure we have an env variable for the secret, fallback for local dev if needed
     const expectedSecret = platform.env.INGEST_SECRET || 'dev-secret-key-123';
 
     if (!authHeader || authHeader !== `Bearer ${expectedSecret}`) {
@@ -22,18 +21,14 @@ export async function POST({ request, platform }) {
             return json({ error: 'Missing core article fields (id, title, url, domain)' }, { status: 400 });
         }
 
-        // 3. Insert into D1 (ON CONFLICT DO NOTHING equivalent in SQLite)
+        // 3. Insert into D1
         const query = `
             INSERT INTO articles (
-                id, title, url, domain, content, published_at,
-                epistemic_opinion_score, epistemic_mixed_score, epistemic_facts_score,
-                emotive_triggering_score, emotive_mixed_score, emotive_calm_score,
-                density_fluff_score, density_standard_score, density_deep_score
+                id, title, url, domain, content, image_url, published_at,
+                objectivity_score, calm_score, depth_score
             ) VALUES (
-                ?1, ?2, ?3, ?4, ?5, ?6,
-                ?7, ?8, ?9,
-                ?10, ?11, ?12,
-                ?13, ?14, ?15
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7,
+                ?8, ?9, ?10
             )
             ON CONFLICT(url) DO NOTHING
             RETURNING id;
@@ -45,16 +40,11 @@ export async function POST({ request, platform }) {
             article.url,
             article.domain,
             article.content || null,
+            article.image_url || null,
             article.published_at || null,
-            article.epistemic_opinion_score ?? 0.333,
-            article.epistemic_mixed_score ?? 0.333,
-            article.epistemic_facts_score ?? 0.334,
-            article.emotive_triggering_score ?? 0.333,
-            article.emotive_mixed_score ?? 0.333,
-            article.emotive_calm_score ?? 0.334,
-            article.density_fluff_score ?? 0.333,
-            article.density_standard_score ?? 0.333,
-            article.density_deep_score ?? 0.334
+            article.objectivity_score ?? 0.5,
+            article.calm_score ?? 0.5,
+            article.depth_score ?? 0.5
         );
 
         const result = await stmt.first();

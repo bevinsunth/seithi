@@ -8,84 +8,45 @@
 	let error = "";
 	let total = 0;
 
-	// Individual filter values for all 9 scores (min and max)
-	let minEpistemicOpinion = 0;
-	let maxEpistemicOpinion = 1;
-	let minEpistemicMixed = 0;
-	let maxEpistemicMixed = 1;
-	let minEpistemicFacts = 0;
-	let maxEpistemicFacts = 1;
+	// Filter state — one min/max pair per axis
+	let minObjectivity = 0,
+		maxObjectivity = 1;
+	let minCalm = 0,
+		maxCalm = 1;
+	let minDepth = 0,
+		maxDepth = 1;
 
-	let minEmotiveTriggering = 0;
-	let maxEmotiveTriggering = 1;
-	let minEmotiveMixed = 0;
-	let maxEmotiveMixed = 1;
-	let minEmotiveCalm = 0;
-	let maxEmotiveCalm = 1;
-
-	let minDensityFluff = 0;
-	let maxDensityFluff = 1;
-	let minDensityStandard = 0;
-	let maxDensityStandard = 1;
-	let minDensityDeep = 0;
-	let maxDensityDeep = 1;
+	$: hasActiveFilters =
+		minObjectivity > 0 ||
+		maxObjectivity < 1 ||
+		minCalm > 0 ||
+		maxCalm < 1 ||
+		minDepth > 0 ||
+		maxDepth < 1;
 
 	async function loadArticles() {
 		loading = true;
 		error = "";
 		try {
-			// For now, use the highest min score from each axis as the filter
-			// Backend currently only supports min filters (not max)
-			const minFacts = Math.max(
-				minEpistemicFacts,
-				minEpistemicMixed,
-				minEpistemicOpinion,
-			);
-			const minCalm = Math.max(
-				minEmotiveCalm,
-				minEmotiveMixed,
-				minEmotiveTriggering,
-			);
-			const minDeep = Math.max(
-				minDensityDeep,
-				minDensityStandard,
-				minDensityFluff,
-			);
-
 			const response = await getArticles(
 				20,
 				0,
-				minFacts,
+				minObjectivity,
 				minCalm,
-				minDeep,
+				minDepth,
 			);
 
-			// Client-side filtering for max values
-			let filteredArticles = response.articles || [];
-			filteredArticles = filteredArticles.filter(
-				(article) =>
-					article.epistemic_opinion_score >= minEpistemicOpinion &&
-					article.epistemic_opinion_score <= maxEpistemicOpinion &&
-					article.epistemic_mixed_score >= minEpistemicMixed &&
-					article.epistemic_mixed_score <= maxEpistemicMixed &&
-					article.epistemic_facts_score >= minEpistemicFacts &&
-					article.epistemic_facts_score <= maxEpistemicFacts &&
-					article.emotive_triggering_score >= minEmotiveTriggering &&
-					article.emotive_triggering_score <= maxEmotiveTriggering &&
-					article.emotive_mixed_score >= minEmotiveMixed &&
-					article.emotive_mixed_score <= maxEmotiveMixed &&
-					article.emotive_calm_score >= minEmotiveCalm &&
-					article.emotive_calm_score <= maxEmotiveCalm &&
-					article.density_fluff_score >= minDensityFluff &&
-					article.density_fluff_score <= maxDensityFluff &&
-					article.density_standard_score >= minDensityStandard &&
-					article.density_standard_score <= maxDensityStandard &&
-					article.density_deep_score >= minDensityDeep &&
-					article.density_deep_score <= maxDensityDeep,
+			// Client-side max filtering
+			articles = (response.articles || []).filter(
+				(a) =>
+					a.objectivity_score >= minObjectivity &&
+					a.objectivity_score <= maxObjectivity &&
+					a.calm_score >= minCalm &&
+					a.calm_score <= maxCalm &&
+					a.depth_score >= minDepth &&
+					a.depth_score <= maxDepth,
 			);
-
-			articles = filteredArticles;
-			total = filteredArticles.length;
+			total = articles.length;
 		} catch (e) {
 			error =
 				"Failed to load articles. Make sure the backend server is running.";
@@ -171,46 +132,10 @@
 				</div>
 				<div class="stat-title">Active Filters</div>
 				<div class="stat-value text-secondary">
-					{minEpistemicOpinion > 0 ||
-					maxEpistemicOpinion < 1 ||
-					minEpistemicMixed > 0 ||
-					maxEpistemicMixed < 1 ||
-					minEpistemicFacts > 0 ||
-					maxEpistemicFacts < 1 ||
-					minEmotiveTriggering > 0 ||
-					maxEmotiveTriggering < 1 ||
-					minEmotiveMixed > 0 ||
-					maxEmotiveMixed < 1 ||
-					minEmotiveCalm > 0 ||
-					maxEmotiveCalm < 1 ||
-					minDensityFluff > 0 ||
-					maxDensityFluff < 1 ||
-					minDensityStandard > 0 ||
-					maxDensityStandard < 1 ||
-					minDensityDeep > 0 ||
-					maxDensityDeep < 1
-						? "✓"
-						: "—"}
+					{hasActiveFilters ? "✓" : "—"}
 				</div>
 				<div class="stat-desc">
-					{minEpistemicOpinion > 0 ||
-					maxEpistemicOpinion < 1 ||
-					minEpistemicMixed > 0 ||
-					maxEpistemicMixed < 1 ||
-					minEpistemicFacts > 0 ||
-					maxEpistemicFacts < 1 ||
-					minEmotiveTriggering > 0 ||
-					maxEmotiveTriggering < 1 ||
-					minEmotiveMixed > 0 ||
-					maxEmotiveMixed < 1 ||
-					minEmotiveCalm > 0 ||
-					maxEmotiveCalm < 1 ||
-					minDensityFluff > 0 ||
-					maxDensityFluff < 1 ||
-					minDensityStandard > 0 ||
-					maxDensityStandard < 1 ||
-					minDensityDeep > 0 ||
-					maxDensityDeep < 1
+					{hasActiveFilters
 						? "Filtering enabled"
 						: "No filters applied"}
 				</div>
@@ -257,352 +182,145 @@
 							d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
 						></path>
 					</svg>
-					Filter Articles (Min - Max Range)
+					Filter Articles (Min – Max Range)
 				</h2>
 
 				<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					<!-- Epistemic Filters -->
+					<!-- Objectivity -->
 					<div class="space-y-3">
 						<h3 class="font-bold text-base flex items-center gap-2">
-							📊 Epistemic (Truth)
+							📊 Objectivity
 						</h3>
-
-						<!-- Opinionated -->
+						<p class="text-xs opacity-60">Opinionated → Factual</p>
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="obj-min">
 								<span class="label-text text-xs font-semibold"
-									>Opinionated</span
+									>Min</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEpistemicOpinion * 100).toFixed(0)}% - {(
-										maxEpistemicOpinion * 100
-									).toFixed(0)}%
-								</span>
+								<span class="label-text-alt text-xs"
+									>{(minObjectivity * 100).toFixed(0)}%</span
+								>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEpistemicOpinion}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEpistemicOpinion}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="obj-min"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={minObjectivity}
+								class="range range-primary range-xs"
+							/>
 						</div>
-
-						<!-- Balanced -->
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="obj-max">
 								<span class="label-text text-xs font-semibold"
-									>Balanced</span
+									>Max</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEpistemicMixed * 100).toFixed(0)}% - {(
-										maxEpistemicMixed * 100
-									).toFixed(0)}%
-								</span>
-							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEpistemicMixed}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEpistemicMixed}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-						</div>
-
-						<!-- Factual -->
-						<div class="form-control">
-							<label class="label py-1">
-								<span class="label-text text-xs font-semibold"
-									>Factual</span
+								<span class="label-text-alt text-xs"
+									>{(maxObjectivity * 100).toFixed(0)}%</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEpistemicFacts * 100).toFixed(0)}% - {(
-										maxEpistemicFacts * 100
-									).toFixed(0)}%
-								</span>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEpistemicFacts}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEpistemicFacts}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="obj-max"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={maxObjectivity}
+								class="range range-primary range-xs"
+							/>
 						</div>
 					</div>
 
-					<!-- Emotive Filters -->
+					<!-- Calm -->
 					<div class="space-y-3">
 						<h3 class="font-bold text-base flex items-center gap-2">
-							😌 Emotive (Tone)
+							😌 Calm
 						</h3>
-
-						<!-- Triggering -->
+						<p class="text-xs opacity-60">Rage-bait → Calm</p>
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="calm-min">
 								<span class="label-text text-xs font-semibold"
-									>Triggering</span
+									>Min</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEmotiveTriggering * 100).toFixed(0)}% - {(
-										maxEmotiveTriggering * 100
-									).toFixed(0)}%
-								</span>
+								<span class="label-text-alt text-xs"
+									>{(minCalm * 100).toFixed(0)}%</span
+								>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEmotiveTriggering}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEmotiveTriggering}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="calm-min"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={minCalm}
+								class="range range-success range-xs"
+							/>
 						</div>
-
-						<!-- Neutral -->
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="calm-max">
 								<span class="label-text text-xs font-semibold"
-									>Neutral</span
+									>Max</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEmotiveMixed * 100).toFixed(0)}% - {(
-										maxEmotiveMixed * 100
-									).toFixed(0)}%
-								</span>
-							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEmotiveMixed}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEmotiveMixed}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-						</div>
-
-						<!-- Calm -->
-						<div class="form-control">
-							<label class="label py-1">
-								<span class="label-text text-xs font-semibold"
-									>Calm</span
+								<span class="label-text-alt text-xs"
+									>{(maxCalm * 100).toFixed(0)}%</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minEmotiveCalm * 100).toFixed(0)}% - {(
-										maxEmotiveCalm * 100
-									).toFixed(0)}%
-								</span>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minEmotiveCalm}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxEmotiveCalm}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="calm-max"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={maxCalm}
+								class="range range-success range-xs"
+							/>
 						</div>
 					</div>
 
-					<!-- Density Filters -->
+					<!-- Depth -->
 					<div class="space-y-3">
 						<h3 class="font-bold text-base flex items-center gap-2">
-							🔍 Density (Depth)
+							🔍 Depth
 						</h3>
-
-						<!-- Fluff -->
+						<p class="text-xs opacity-60">Fluff → Deep Dive</p>
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="depth-min">
 								<span class="label-text text-xs font-semibold"
-									>Fluff</span
+									>Min</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minDensityFluff * 100).toFixed(0)}% - {(
-										maxDensityFluff * 100
-									).toFixed(0)}%
-								</span>
+								<span class="label-text-alt text-xs"
+									>{(minDepth * 100).toFixed(0)}%</span
+								>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minDensityFluff}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxDensityFluff}
-									class="range range-error range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="depth-min"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={minDepth}
+								class="range range-info range-xs"
+							/>
 						</div>
-
-						<!-- Standard -->
 						<div class="form-control">
-							<label class="label py-1">
+							<label class="label py-1" for="depth-max">
 								<span class="label-text text-xs font-semibold"
-									>Standard</span
+									>Max</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minDensityStandard * 100).toFixed(0)}% - {(
-										maxDensityStandard * 100
-									).toFixed(0)}%
-								</span>
-							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minDensityStandard}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxDensityStandard}
-									class="range range-warning range-xs flex-1"
-								/>
-							</div>
-						</div>
-
-						<!-- Deep -->
-						<div class="form-control">
-							<label class="label py-1">
-								<span class="label-text text-xs font-semibold"
-									>Deep</span
+								<span class="label-text-alt text-xs"
+									>{(maxDepth * 100).toFixed(0)}%</span
 								>
-								<span class="label-text-alt text-xs">
-									{(minDensityDeep * 100).toFixed(0)}% - {(
-										maxDensityDeep * 100
-									).toFixed(0)}%
-								</span>
 							</label>
-							<div class="flex gap-2 items-center">
-								<span class="text-xs opacity-60">Min</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={minDensityDeep}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
-							<div class="flex gap-2 items-center mt-1">
-								<span class="text-xs opacity-60">Max</span>
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.05"
-									bind:value={maxDensityDeep}
-									class="range range-success range-xs flex-1"
-								/>
-							</div>
+							<input
+								id="depth-max"
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								bind:value={maxDepth}
+								class="range range-info range-xs"
+							/>
 						</div>
 					</div>
 				</div>
@@ -700,7 +418,7 @@
 				ML-powered quality scoring for better news consumption
 			</p>
 			<p class="text-sm opacity-50 mt-2">
-				Built with SvelteKit, Go, and PostgreSQL
+				Built with SvelteKit and Cloudflare D1
 			</p>
 		</aside>
 	</footer>

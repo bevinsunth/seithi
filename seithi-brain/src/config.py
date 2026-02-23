@@ -13,42 +13,40 @@ ZERO_SHOT_MODEL = "valhalla/distilbart-mnli-12-3"
 FT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "../models/setfit_v1")
 
 # --- The 3 Axes of Seithi ---
-# Labels must be ordered: 0 -> 1 -> 2
+# Each axis uses binary zero-shot classification.
+# The score is the confidence of the "positive_label" (0.0 → 1.0).
 
-AXIS_EPISTEMIC = {
-    "name": "epistemic",
-    "labels": ["Opinionated", "Balanced with Opinions and Facts", "Factual"],
+AXIS_OBJECTIVITY = {
+    "name": "objectivity",
+    "positive_label": "Factual",       # score=1.0 → factual/objective
+    "negative_label": "Opinionated",   # score=0.0 → opinionated
     "hypothesis_template": "This article is {}."
 }
 
-AXIS_EMOTIVE = {
-    "name": "emotive",
-    "labels": ["Triggering", "Neutral", "Calm"],
-    "hypothesis_template": "The emotion of this article is {}."
+AXIS_CALM = {
+    "name": "calm",
+    "positive_label": "Calm",          # score=1.0 → calm, measured
+    "negative_label": "Triggering",    # score=0.0 → rage-bait, triggering
+    "hypothesis_template": "The tone of this article is {}."
 }
 
-AXIS_DENSITY = {
-    "name": "density",
-    "labels": ["Fluff", "Standard", "Deep Dive"],
+AXIS_DEPTH = {
+    "name": "depth",
+    "positive_label": "Deep",          # score=1.0 → deep dive, substantive
+    "negative_label": "Fluffy",        # score=0.0 → fluff, shallow
     "hypothesis_template": "The content depth of this article is {}."
 }
 
-# Mapping for Zero-Shot
-ALL_AXES = [AXIS_EPISTEMIC, AXIS_EMOTIVE, AXIS_DENSITY]
+# Ordered list of all axes
+ALL_AXES = [AXIS_OBJECTIVITY, AXIS_CALM, AXIS_DEPTH]
 
 # --- Filtering Configuration ---
-# Enable/disable filtering of articles based on probability thresholds
+# Enable/disable filtering of articles based on score thresholds
 FILTER_ENABLED = False  # Set to True to enable filtering
 
-# Minimum probability thresholds for desired classes
-# Articles must meet ALL specified thresholds to be saved
+# Minimum score thresholds (articles must meet ALL to be saved)
 FILTER_THRESHOLDS = {
-    # Epistemic axis: Require high confidence in "Facts" (index 2)
-    "epistemic_facts_min": 0.5,      # At least 50% confidence in "Facts"
-
-    # Emotive axis: Require high confidence in "Calm" (index 2)
-    "emotive_calm_min": 0.4,         # At least 40% confidence in "Calm"
-
-    # Density axis: Require high confidence in "Deep" (index 2)
-    "density_deep_min": 0.3          # At least 30% confidence in "Deep Dive"
+    "objectivity_min": 0.5,   # At least 50% confidence in "Factual"
+    "calm_min": 0.4,           # At least 40% confidence in "Calm"
+    "depth_min": 0.3,          # At least 30% confidence in "Deep"
 }

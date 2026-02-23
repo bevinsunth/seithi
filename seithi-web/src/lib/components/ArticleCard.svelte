@@ -15,7 +15,6 @@
 		});
 	};
 
-	// Extract domain from URL
 	const getDomain = (url: string) => {
 		try {
 			return new URL(url).hostname.replace("www.", "");
@@ -28,16 +27,31 @@
 <div
 	class="card bg-base-200 shadow-2xl hover:shadow-primary/20 transition-all duration-300 border border-base-300"
 >
+	<!-- Article Image (if available) -->
+	{#if article.image_url}
+		<figure class="h-48 overflow-hidden rounded-t-2xl">
+			<img
+				src={article.image_url}
+				alt={article.title}
+				class="w-full h-full object-cover"
+				loading="lazy"
+				onerror="this.parentElement.style.display='none'"
+			/>
+		</figure>
+	{/if}
+
 	<div class="card-body">
 		<!-- Article Header -->
 		<div class="flex items-start gap-4 mb-4">
-			<div class="avatar placeholder">
-				<div
-					class="bg-primary text-primary-content rounded-full w-12 h-12"
-				>
-					<span class="text-xl">📰</span>
+			{#if !article.image_url}
+				<div class="avatar placeholder">
+					<div
+						class="bg-primary text-primary-content rounded-full w-12 h-12"
+					>
+						<span class="text-xl">📰</span>
+					</div>
 				</div>
-			</div>
+			{/if}
 			<div class="flex-1">
 				<h2
 					class="card-title text-xl hover:text-primary transition-colors"
@@ -112,38 +126,18 @@
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 				<ScoreBar
 					articleId={article.id}
-					axis="epistemic"
-					labels={["Opinionated", "Balanced", "Factual"]}
-					scores={[
-						article.epistemic_opinion_score,
-						article.epistemic_mixed_score,
-						article.epistemic_facts_score,
-					]}
-					colors={["error", "warning", "success"]}
+					axis="objectivity"
+					score={article.objectivity_score}
 				/>
-
 				<ScoreBar
 					articleId={article.id}
-					axis="emotive"
-					labels={["Triggering", "Neutral", "Calm"]}
-					scores={[
-						article.emotive_triggering_score,
-						article.emotive_mixed_score,
-						article.emotive_calm_score,
-					]}
-					colors={["error", "warning", "success"]}
+					axis="calm"
+					score={article.calm_score}
 				/>
-
 				<ScoreBar
 					articleId={article.id}
-					axis="density"
-					labels={["Fluff", "Standard", "Deep"]}
-					scores={[
-						article.density_fluff_score,
-						article.density_standard_score,
-						article.density_deep_score,
-					]}
-					colors={["error", "warning", "success"]}
+					axis="depth"
+					score={article.depth_score}
 				/>
 			</div>
 		</div>

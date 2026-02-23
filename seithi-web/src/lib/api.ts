@@ -3,16 +3,12 @@ export interface Article {
     title: string;
     url: string;
     domain: string;
+    image_url?: string;
     published_at: string;
-    epistemic_opinion_score: number;
-    epistemic_mixed_score: number;
-    epistemic_facts_score: number;
-    emotive_triggering_score: number;
-    emotive_mixed_score: number;
-    emotive_calm_score: number;
-    density_fluff_score: number;
-    density_standard_score: number;
-    density_deep_score: number;
+    // Single score per axis (0.0 → 1.0)
+    objectivity_score: number; // 0 = opinionated, 1 = factual
+    calm_score: number;        // 0 = rage-bait, 1 = calm
+    depth_score: number;       // 0 = fluff, 1 = deep dive
 }
 
 export interface ArticlesResponse {
@@ -33,16 +29,16 @@ const API_BASE_URL = '/api';
 export async function getArticles(
     limit: number = 20,
     offset: number = 0,
-    minFacts: number = 0,
+    minObjectivity: number = 0,
     minCalm: number = 0,
-    minDeep: number = 0
+    minDepth: number = 0
 ): Promise<ArticlesResponse> {
     const params = new URLSearchParams({
         limit: limit.toString(),
         offset: offset.toString(),
-        min_facts: minFacts.toString(),
+        min_objectivity: minObjectivity.toString(),
         min_calm: minCalm.toString(),
-        min_deep: minDeep.toString()
+        min_depth: minDepth.toString()
     });
 
     const response = await fetch(`${API_BASE_URL}/articles?${params}`);
