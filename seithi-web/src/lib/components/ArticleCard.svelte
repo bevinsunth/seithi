@@ -35,7 +35,6 @@
 				alt={article.title}
 				class="w-full h-full object-cover"
 				loading="lazy"
-				onerror="this.parentElement.style.display='none'"
 			/>
 		</figure>
 	{/if}

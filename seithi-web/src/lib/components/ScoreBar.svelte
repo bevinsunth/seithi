@@ -20,14 +20,14 @@
 		objectivity: {
 			label: "Objectivity",
 			icon: "📊",
-			lowLabel: "Opinionated",
+			lowLabel: "Opinion",
 			highLabel: "Factual",
 			color: "primary",
 		},
 		calm: {
 			label: "Calm",
 			icon: "😌",
-			lowLabel: "Rage-bait",
+			lowLabel: "Rage",
 			highLabel: "Calm",
 			color: "success",
 		},
@@ -35,7 +35,7 @@
 			label: "Depth",
 			icon: "🔍",
 			lowLabel: "Fluff",
-			highLabel: "Deep Dive",
+			highLabel: "Deep",
 			color: "info",
 		},
 	};
@@ -63,30 +63,32 @@
 	}
 </script>
 
-<div class="p-3 bg-base-100 rounded-lg border border-base-content/10">
-	<div class="flex justify-between items-center mb-2">
-		<h4 class="text-xs font-bold flex items-center gap-1">
-			<span>{config.icon}</span>
-			<span>{config.label}</span>
-		</h4>
-		{#if feedbackSubmitted}
-			<div class="badge badge-success badge-xs gap-1">✓</div>
-		{/if}
+<div class="p-2 bg-base-100 rounded-lg border border-base-content/10 min-w-0">
+	<!-- Header: icon + label + badge -->
+	<div class="flex-col items-center justify-between gap-1 mb-1.5 min-w-0">
+		<span
+			class="text-xs font-bold flex items-center gap-1 truncate min-w-0"
+		>
+			<span class="shrink-0">{config.icon}</span>
+			<span class="truncate">{config.label}</span>
+		</span>
+		<span class="badge badge-{config.color} badge-xs font-semibold shrink-0"
+			>{pct}%</span
+		>
 	</div>
 
-	<!-- Score bar -->
-	<div class="space-y-1">
-		<div class="flex items-center justify-between text-[10px] opacity-60">
-			<span>{config.lowLabel}</span>
-			<span class="badge badge-{config.color} badge-xs font-semibold"
-				>{pct}%</span
-			>
-			<span>{config.highLabel}</span>
-		</div>
-		<progress
-			class="progress progress-{config.color} w-full h-2"
-			value={pct}
-			max="100"
-		></progress>
+	<!-- Progress bar -->
+	<progress
+		class="progress progress-{config.color} w-full h-1.5"
+		value={pct}
+		max="100"
+	></progress>
+
+	<!-- Low / High labels below the bar -->
+	<div class="flex justify-between mt-0.5">
+		<span class="text-[9px] opacity-50 truncate">{config.lowLabel}</span>
+		<span class="text-[9px] opacity-50 truncate text-right"
+			>{config.highLabel}</span
+		>
 	</div>
 </div>
